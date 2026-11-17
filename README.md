@@ -17,3 +17,7 @@ Ouvrir le dossier dans Godot 4.4 ou plus récent, puis lancer `project.godot`.
 Le workflow GitHub Actions `.github/workflows/android-apk.yml` compile l'APK de débogage à chaque push sur `main` et sur demande manuelle. L'APK est publié comme artefact du workflow.
 
 > Le premier APK est une build de développement non signée pour publication sur Google Play.
+
+
+## Build status
+A build Android est déclenché automatiquement à chaque push sur `main`. Consultez l'onglet Actions pour suivre l'export et récupérer l'artefact APK si le workflow termine avec succès.
