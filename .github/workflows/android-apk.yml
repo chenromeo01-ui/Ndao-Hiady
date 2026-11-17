@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install required download tools
+        run: |
+          set -eu
+          apt-get update
+          apt-get install -y --no-install-recommends curl unzip
+          command -v curl
+          command -v unzip
+
       - name: Install Godot Android export templates
         run: |
           set -eu
