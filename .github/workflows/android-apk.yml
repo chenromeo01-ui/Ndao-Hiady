@@ -18,16 +18,56 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Godot Android export templates
+        run: |
+          set -eu
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          mkdir -p "$TEMPLATE_DIR" /tmp/godot-templates
+          curl -L --fail --retry 3 "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz" -o /tmp/godot-templates/export_templates.tpz
+          unzip -q /tmp/godot-templates/export_templates.tpz -d /tmp/godot-templates/unpacked
+          cp -a /tmp/godot-templates/unpacked/templates/. "$TEMPLATE_DIR/"
+
+      - name: Configure Java, Android SDK and debug keystore
+        run: |
+          set -eu
+          JAVA_BIN="$(readlink -f "$(command -v java)")"
+          JAVA_HOME_PATH="$(dirname "$(dirname "$JAVA_BIN")")"
+          mkdir -p "$HOME/.android" "$HOME/.config/godot"
+          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/java_sdk_path = "$JAVA_HOME_PATH"
+          export/android/android_sdk_path = "/usr/lib/android-sdk"
+          export/android/debug_keystore = "$HOME/.android/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME_PATH"
+
       - name: Import project resources
-        run: godot --headless --editor --path . --quit
+        run: |
+          godot --headless --editor --path . --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -q "SCRIPT ERROR" /tmp/godot-import.log; then
+            echo "Godot script parsing failed during import."
+            exit 1
+          fi
 
       - name: Validate game scripts
-        run: godot --headless --path . --quit-after 3
+        run: |
+          godot --headless --path . --quit-after 3 2>&1 | tee /tmp/godot-validation.log
+          if grep -q "SCRIPT ERROR" /tmp/godot-validation.log; then
+            echo "Godot script validation failed."
+            exit 1
+          fi
 
       - name: Export debug APK
         run: |
           mkdir -p build
           godot --headless --path . --export-debug "Android" build/Ndao-Hiady-Afo-Kasoka.apk
+          test -s build/Ndao-Hiady-Afo-Kasoka.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
