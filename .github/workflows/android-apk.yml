@@ -54,6 +54,9 @@ jobs:
           EOF
           java -version
           echo "JAVA_HOME=$JAVA_HOME_PATH"
+          ls -la /usr/lib/android-sdk
+          ls -la /usr/lib/android-sdk/build-tools || true
+          ls -la /usr/lib/android-sdk/platforms || true
 
       - name: Import project resources
         run: |
@@ -74,7 +77,7 @@ jobs:
       - name: Export debug APK
         run: |
           mkdir -p build
-          godot --headless --path . --export-debug "Android" build/Ndao-Hiady-Afo-Kasoka.apk
+          godot --headless --verbose --path . --export-debug "Android" build/Ndao-Hiady-Afo-Kasoka.apk 2>&1 | tee /tmp/godot-export.log
           test -s build/Ndao-Hiady-Afo-Kasoka.apk
 
       - name: Upload APK artifact
