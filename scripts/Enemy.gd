@@ -43,7 +43,9 @@ func _draw() -> void:
         body_color = Color("#f2d5a0")
     var scale_factor := 1.55 if boss else 1.0
     draw_set_transform(Vector2.ZERO, 0.0, Vector2(scale_factor, scale_factor))
-    draw_ellipse(Vector2(0,31), Vector2(25,8), Color(0.02,0.02,0.03,0.35))
+    draw_set_transform(Vector2(0,31),0.0,Vector2(1.0,0.33))
+    draw_circle(Vector2.ZERO,25.0,Color(0.02,0.02,0.03,0.35))
+    draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
     draw_line(Vector2(-7,7),Vector2(-12,29),Color("#29232a"),9.0,true)
     draw_line(Vector2(7,7),Vector2(12,29),Color("#29232a"),9.0,true)
     draw_colored_polygon(PackedVector2Array([Vector2(-14,-25),Vector2(14,-25),Vector2(16,12),Vector2(-16,12)]),body_color)
