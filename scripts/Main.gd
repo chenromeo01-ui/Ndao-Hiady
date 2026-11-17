@@ -11,6 +11,8 @@ var victory: bool = false
 var message_label: Label
 var health_label: Label
 var score_label: Label
+var restart_button: Button
+var hero_damage_cooldown: float = 0.0
 var score: int = 0
 var arena_width: float = 1280.0
 var arena_height: float = 720.0
@@ -89,6 +91,15 @@ func _build_hud() -> void:
     attack_button.add_theme_color_override("font_color",Color("#fff0d0"))
     attack_button.pressed.connect(_attack)
     layer.add_child(attack_button)
+    restart_button = Button.new()
+    restart_button.text = "REJOUER"
+    restart_button.position = Vector2(500, 390)
+    restart_button.size = Vector2(280, 90)
+    restart_button.add_theme_font_size_override("font_size", 30)
+    restart_button.add_theme_color_override("font_color", Color("#fff0d0"))
+    restart_button.pressed.connect(_restart_game)
+    restart_button.visible = false
+    layer.add_child(restart_button)
     _refresh_hud()
 
 func _add_touch_button(layer: CanvasLayer, caption: String, at: Vector2, action_name: String) -> void:
@@ -105,6 +116,7 @@ func _process(delta: float) -> void:
     if game_over:
         return
     attack_timer = maxf(0.0, attack_timer - delta)
+    hero_damage_cooldown = maxf(0.0, hero_damage_cooldown - delta)
     var direction := Vector2(
         float(Input.is_action_pressed("move_right")) - float(Input.is_action_pressed("move_left")),
         float(Input.is_action_pressed("move_down")) - float(Input.is_action_pressed("move_up"))
@@ -125,7 +137,9 @@ func _process(delta: float) -> void:
         if offset.length() > (85.0 if enemy.enemy_kind == "boss" else 55.0):
             enemy.position += offset.normalized() * enemy.speed * delta
         elif enemy.attack_cooldown <= 0.0:
-            hero.take_damage(12 if enemy.enemy_kind == "boss" else 6)
+            if hero_damage_cooldown <= 0.0:
+                hero.take_damage(12 if enemy.enemy_kind == "boss" else 6)
+                hero_damage_cooldown = 0.55
             enemy.attack_cooldown = 1.25 if enemy.enemy_kind == "boss" else 1.6
     for enemy in enemies:
         if is_instance_valid(enemy) and enemy.health <= 0:
@@ -134,11 +148,13 @@ func _process(delta: float) -> void:
     enemies = enemies.filter(func(e): return is_instance_valid(e) and e.health > 0)
     if hero.health <= 0:
         game_over = true
-        message_label.text = "AFO'KASOKA EST TOMBÉ — RECOMMENCER"
+        message_label.text = "AFO'KASOKA EST TOMBÉ"
+        restart_button.visible = true
     elif enemies.is_empty():
         victory = true
         game_over = true
         message_label.text = "VICTOIRE ! MORONDAVA EST LIBÉRÉE"
+        restart_button.visible = true
     _refresh_hud()
 
 func _attack() -> void:
@@ -158,6 +174,28 @@ func _refresh_hud() -> void:
         return
     health_label.text = "VIE  %d / %d" % [hero.health, hero.max_health]
     score_label.text = "SCORE  %d" % score
+
+func _restart_game() -> void:
+    for enemy in enemies:
+        if is_instance_valid(enemy):
+            enemy.queue_free()
+    enemies.clear()
+    if is_instance_valid(hero):
+        hero.queue_free()
+    hero = FighterScript.new()
+    hero.position = Vector2(330, 520)
+    add_child(hero)
+    _spawn_enemy("scout", Vector2(790, 500))
+    _spawn_enemy("soldier", Vector2(970, 525))
+    _spawn_enemy("boss", Vector2(1110, 480))
+    score = 0
+    attack_timer = 0.0
+    hero_damage_cooldown = 0.0
+    game_over = false
+    victory = false
+    restart_button.visible = false
+    message_label.text = "MORONDAVA  •  ALLÉE DES BAOBABS"
+    _refresh_hud()
 
 func _draw() -> void:
     draw_rect(Rect2(0,0,arena_width,arena_height),Color("#e7b879"))
