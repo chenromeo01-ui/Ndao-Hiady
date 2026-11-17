@@ -58,7 +58,14 @@ jobs:
           echo "JAVA_HOME=$JAVA_HOME_PATH"
           ls -la /usr/lib/android-sdk
           ls -la /usr/lib/android-sdk/build-tools || true
-          ls -la /usr/lib/android-sdk/platforms || true
+          ls -la /usr/lib/android-sdk/platforms
+          echo "Installed Android SDK packages:"
+          sdkmanager --sdk_root=/usr/lib/android-sdk --list_installed
+          echo "Installed Godot export templates:"
+          ls -lah "$TEMPLATE_DIR"
+          test -s "$TEMPLATE_DIR/android_debug.apk"
+          test -s "$TEMPLATE_DIR/android_release.apk"
+          test -s "$TEMPLATE_DIR/version.txt" || printf '4.4.1.stable\\n' > "$TEMPLATE_DIR/version.txt"
 
       - name: Import project resources
         run: |
@@ -79,8 +86,15 @@ jobs:
       - name: Export debug APK
         run: |
           mkdir -p build
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
+          godot --headless --editor --path . --quit --verbose 2>&1 | tee /tmp/godot-export-preflight.log
           godot --headless --verbose --path . --export-debug "Android" build/Ndao-Hiady-Afo-Kasoka.apk 2>&1 | tee /tmp/godot-export.log
           test -s build/Ndao-Hiady-Afo-Kasoka.apk
+          file build/Ndao-Hiady-Afo-Kasoka.apk
+          unzip -t build/Ndao-Hiady-Afo-Kasoka.apk
+          unzip -l build/Ndao-Hiady-Afo-Kasoka.apk | grep -E 'AndroidManifest.xml|lib/arm64-v8a/libgodot_android.so'
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
