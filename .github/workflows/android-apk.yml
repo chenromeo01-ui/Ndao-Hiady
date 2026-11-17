@@ -41,6 +41,8 @@ jobs:
           JAVA_BIN="$(readlink -f "$(command -v java)")"
           JAVA_HOME_PATH="$(dirname "$(dirname "$JAVA_BIN")")"
           mkdir -p "$HOME/.android" "$HOME/.config/godot"
+          yes | sdkmanager --sdk_root=/usr/lib/android-sdk --licenses >/dev/null
+          sdkmanager --sdk_root=/usr/lib/android-sdk "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;23.2.8568313"
           keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
           cat > "$HOME/.config/godot/editor_settings-4.4.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
