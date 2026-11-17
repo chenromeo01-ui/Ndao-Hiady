@@ -18,7 +18,9 @@ func take_damage(amount: int) -> void:
 
 func _draw() -> void:
     # Ombre au sol
-    draw_ellipse(Vector2(0, 31), Vector2(24, 8), Color(0.02, 0.025, 0.03, 0.35))
+    draw_set_transform(Vector2(0, 31), 0.0, Vector2(1.0, 0.33))
+    draw_circle(Vector2.ZERO, 24.0, Color(0.02, 0.025, 0.03, 0.35))
+    draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
     # Jambes et pagne
     draw_line(Vector2(-7, 7), Vector2(-12, 29), Color("#34251d"), 9.0, true)
     draw_line(Vector2(7, 7), Vector2(12, 29), Color("#34251d"), 9.0, true)
