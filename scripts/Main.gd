@@ -172,7 +172,7 @@ func _draw() -> void:
     _draw_baobab(Vector2(1000,300),1.65)
     _draw_baobab(Vector2(1200,310),0.9)
     # Piste de terre
-    draw_polygon(PackedVector2Array([Vector2(0,410),Vector2(1280,390),Vector2(1280,720),Vector2(0,720)]),Color("#b77a4e"))
+    draw_colored_polygon(PackedVector2Array([Vector2(0,410),Vector2(1280,390),Vector2(1280,720),Vector2(0,720)]),Color("#b77a4e"))
     for i in range(18):
         var x := float((i * 137) % 1280)
         var y := 425.0 + float((i * 53) % 250)
