@@ -21,6 +21,9 @@ jobs:
       - name: Import project resources
         run: godot --headless --editor --path . --quit
 
+      - name: Validate game scripts
+        run: godot --headless --path . --quit-after 3
+
       - name: Export debug APK
         run: |
           mkdir -p build
