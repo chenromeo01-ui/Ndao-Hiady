@@ -38,6 +38,7 @@ jobs:
       - name: Configure Java, Android SDK and debug keystore
         run: |
           set -eu
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/4.4.1.stable"
           JAVA_BIN="$(readlink -f "$(command -v java)")"
           JAVA_HOME_PATH="$(dirname "$(dirname "$JAVA_BIN")")"
           mkdir -p "$HOME/.android" "$HOME/.config/godot"
@@ -65,7 +66,7 @@ jobs:
           ls -lah "$TEMPLATE_DIR"
           test -s "$TEMPLATE_DIR/android_debug.apk"
           test -s "$TEMPLATE_DIR/android_release.apk"
-          test -s "$TEMPLATE_DIR/version.txt" || printf '4.4.1.stable\\n' > "$TEMPLATE_DIR/version.txt"
+          test -s "$TEMPLATE_DIR/version.txt" || printf '%s\\n' '4.4.1.stable' > "$TEMPLATE_DIR/version.txt"
 
       - name: Import project resources
         run: |
